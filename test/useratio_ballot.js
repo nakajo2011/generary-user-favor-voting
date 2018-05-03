@@ -19,30 +19,15 @@ const {
 
 const one_day = 24 * 60 * 60
 contract('UseratioToken', function (accounts) {
-  let start_block_timestamp = 0
-
-  beforeEach(async () => {
-    start_block_timestamp = await latestTime()
-  })
-
-  afterEach(async () => {
-    const latest = await latestTime()
-    const diff = start_block_timestamp - latest
-    if(diff < 0) {
-      await increaseTime(diff)
-      await advanceBlock()
-    }
-  })
-
   it("should assert true", async () => {
     const useratio_ballot = await UseratioBallot.new();
     assert.isOk(useratio_ballot)
   })
 
   it("normalized day unit.", async () => {
-    const useratio_token = await UseratioBallot.new();
-    const date = await useratio_token.getNormalizedDate()
     const localnow = parseInt(Date.now() / 1000) // millis -> sec
+    const useratio_ballot = await UseratioBallot.new();
+    const date = await useratio_ballot.getNormalizedDate(localnow)
 
     const normalized = parseInt(localnow / one_day) * one_day
     assert.equal(date.toNumber(), normalized)
@@ -64,18 +49,58 @@ contract('UseratioToken', function (accounts) {
     assert.equal(1, balance.toNumber())
   })
 
-  it("ratio increase only one time in the day.", async () => {
+  it("ratio increase two days test.", async () => {
     const useratio_token = await UseratioBallot.new();
     const account = accounts[0]
     await useratio_token.increaseRatio(account)
     let balance = await useratio_token.balances(account)
     assert.equal(1, balance)
 
-    increaseTime(one_day)
+    await increaseTime(one_day)
     await useratio_token.increaseRatio(account) // not increase. evm reverted.
     balance = await useratio_token.balances(account)
     assert.equal(2, balance.toNumber())
+  })
 
+  describe("ballots of test.", () => {
+    let useratio_ballot, account, today, yesterday, before2day, long_day_ago
+    before(async () => {
+      useratio_ballot = await UseratioBallot.new();
+      account = accounts[0]
+
+      await useratio_ballot.increaseRatio(account)
+      await increaseTime(one_day)
+      await useratio_ballot.increaseRatio(account) // not increase. evm reverted.
+      let balance = await useratio_ballot.balances(account)
+      assert.equal(2, balance.toNumber())
+
+      // now is increased one days. today and yesterday has ballot.
+      const localnow = parseInt(await latestTime() / 1000) // millis -> sec
+      today = parseInt(localnow / one_day) * one_day
+      yesterday = today - one_day
+      before2day = yesterday - one_day
+      long_day_ago = today - one_day * 10
+
+    })
+    it("no have ballots term test.", async () => {
+      const ballots = await useratio_ballot.ballotsOf(account, long_day_ago, before2day)
+      assert.equal(0, ballots.toNumber())
+    })
+
+    it("to yesterday test.", async () => {
+      const ballots = await useratio_ballot.ballotsOf(account, long_day_ago, yesterday)
+      assert.equal(1, ballots.toNumber())
+    })
+
+    it("to today test.", async () => {
+      const ballots = await useratio_ballot.ballotsOf(account, long_day_ago, today)
+      assert.equal(2, ballots.toNumber())
+    })
+
+    it("at today test.", async () => {
+      const ballots = await useratio_ballot.ballotsOf(account, today, today)
+      assert.equal(1, ballots.toNumber())
+    })
   })
 
 });
