@@ -1,4 +1,4 @@
-const UseratioToken = artifacts.require('./UseratioToken')
+const UseratioBallot = artifacts.require('./UseratioBallot')
 import lkTestHelpers from 'lk-test-helpers/src/main.js'
 
 const {
@@ -20,12 +20,12 @@ const {
 const one_day = 24 * 60 * 60
 contract('UseratioToken', function (accounts) {
   it("should assert true", async () => {
-    const useratio_token = await UseratioToken.new();
-    assert.isOk(useratio_token)
+    const useratio_ballot = await UseratioBallot.new();
+    assert.isOk(useratio_ballot)
   })
 
   it("normalized day unit.", async () => {
-    const useratio_token = await UseratioToken.new();
+    const useratio_token = await UseratioBallot.new();
     const date = await useratio_token.getNormalizedDate()
     const localnow = parseInt(Date.now() / 1000) // millis -> sec
 
@@ -34,7 +34,7 @@ contract('UseratioToken', function (accounts) {
   })
 
   it("ratio increase only one time in the day.", async () => {
-    const useratio_token = await UseratioToken.new();
+    const useratio_token = await UseratioBallot.new();
     const account = accounts[0]
     await useratio_token.increaseRatio(account)
     let balance = await useratio_token.balances(account)
@@ -50,7 +50,7 @@ contract('UseratioToken', function (accounts) {
   })
 
   it("ratio increase only one time in the day.", async () => {
-    const useratio_token = await UseratioToken.new();
+    const useratio_token = await UseratioBallot.new();
     const account = accounts[0]
     await useratio_token.increaseRatio(account)
     let balance = await useratio_token.balances(account)

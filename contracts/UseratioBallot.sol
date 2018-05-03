@@ -1,11 +1,11 @@
-pragma solidity ^0.4.21;
+pragma solidity ^0.4.23;
 
 import "../node_modules/zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /** refer: https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/token/ERC20/MintableToken.sol
 **/
-contract UseratioToken is Ownable {
+contract UseratioBallot is Ownable {
   using SafeMath for uint256;
 
   uint256 public constant term_unit = 24 * 60 * 60;
@@ -29,7 +29,7 @@ contract UseratioToken is Ownable {
     _;
   }
 
-  function UseratioToken() public {
+  constructor() public {
     // constructor
   }
 
