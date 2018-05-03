@@ -19,6 +19,21 @@ const {
 
 const one_day = 24 * 60 * 60
 contract('UseratioToken', function (accounts) {
+  let start_block_timestamp = 0
+
+  beforeEach(async () => {
+    start_block_timestamp = await latestTime()
+  })
+
+  afterEach(async () => {
+    const latest = await latestTime()
+    const diff = start_block_timestamp - latest
+    if(diff < 0) {
+      await increaseTime(diff)
+      await advanceBlock()
+    }
+  })
+
   it("should assert true", async () => {
     const useratio_ballot = await UseratioBallot.new();
     assert.isOk(useratio_ballot)
@@ -34,18 +49,18 @@ contract('UseratioToken', function (accounts) {
   })
 
   it("ratio increase only one time in the day.", async () => {
-    const useratio_token = await UseratioBallot.new();
+    const useratio_ballot = await UseratioBallot.new();
     const account = accounts[0]
-    await useratio_token.increaseRatio(account)
-    let balance = await useratio_token.balances(account)
+    await useratio_ballot.increaseRatio(account)
+    let balance = await useratio_ballot.balances(account)
     assert.equal(1, balance)
 
     try {
-      await useratio_token.increaseRatio(account) // not increase. evm reverted.
+      await useratio_ballot.increaseRatio(account) // not increase. evm reverted.
     } catch (e) {
       assert.equal("Error: VM Exception while processing transaction: revert", e)
     }
-    balance = await useratio_token.balances(account)
+    balance = await useratio_ballot.balances(account)
     assert.equal(1, balance.toNumber())
   })
 
@@ -60,6 +75,7 @@ contract('UseratioToken', function (accounts) {
     await useratio_token.increaseRatio(account) // not increase. evm reverted.
     balance = await useratio_token.balances(account)
     assert.equal(2, balance.toNumber())
+
   })
 
 });
