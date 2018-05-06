@@ -59,7 +59,6 @@ contract UseratioBallot is Ownable {
      * @return sender's ballots count.
      */
     function ballotsOf(address _owner, uint _from, uint _to) public view returns (uint) {
-        require(balances[_owner] > 0);
         _from = getNormalizedDate(_from);
         // to correct
         _to = getNormalizedDate(_to);
