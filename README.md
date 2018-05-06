@@ -1,5 +1,5 @@
 # generary-user-favor-voting
-The Voting system that followed to user use ratio of the application.
+The Voting system that followed to user use ratio of the application.  
 アプリケーションの利用率に応じた投票システムのサンプル。
 
 # Specification draft
